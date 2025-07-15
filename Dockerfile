@@ -1,7 +1,7 @@
 # To use this Dockerfile, you have to set `output: 'standalone'` in your next.config.js file.
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:22.12.0-alpine AS base
+FROM node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -13,8 +13,8 @@ WORKDIR /app
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --legacy-peer-deps; \
   else echo "Lockfile not found." && exit 1; \
   fi
 
@@ -28,7 +28,11 @@ COPY . .
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Add environment variables for build
+ENV DATABASE_URI=postgres://postgres:cLdBe7jfkhAlOhvx@pjsofefgdbrqmtcbvwco.supabase.co:5432/postgres
+ENV PAYLOAD_SECRET=your-secret-key-change-this
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
@@ -42,8 +46,9 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV DATABASE_URI=postgres://postgres:cLdBe7jfkhAlOhvx@pjsofefgdbrqmtcbvwco.supabase.co:5432/postgres
+ENV PAYLOAD_SECRET=your-secret-key-change-this
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
