@@ -16,12 +16,10 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqc29mZWZnZGJycW10Y2J2d2NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1OTEyNzAsImV4cCI6MjA2ODE2NzI3MH0.m_9rj6-T3f2Dr9OljoGYDA5W7nDF4vDAlyxyjTfVB0A
 ENV PAYLOAD_SECRET=your-secret-key-change-this
-
-# Build the application
-RUN npm run build
+ENV DATABASE_URI=postgres://postgres:cLdBe7jfkhAlOhvx@pjsofefgdbrqmtcbvwco.supabase.co:5432/postgres
 
 # Expose the port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Build and start the application at runtime
+CMD ["sh", "-c", "npm run build && npm start"]
